@@ -1,0 +1,11 @@
+{
+  "description": "四类演示样例视频的输入规格（真实录制时按此对齐；当前用 MockDevice 合成等价输入）。",
+  "format": "mp4 / 15-60s / 与 eufy 视频流同分辨率",
+  "scenarios": [
+    { "id": "family",    "label": "家人经过",   "expected_risk": "low",    "metric": "正常速度经过门口，不停留" },
+    { "id": "delivery",  "label": "快递送件",   "expected_risk": "low",    "metric": "手持盒子到门口，放下后离开，包裹遗留" },
+    { "id": "loiter",    "label": "陌生人夜间徘徊", "expected_risk": "high", "metric": "门口停留 + 反复靠近门锁 ROI" },
+    { "id": "occlusion", "label": "镜头遮挡",   "expected_risk": "health", "metric": "数秒内 Health Score 明显下降" }
+  ],
+  "note": "每个场景建议录 3-5 条，保留一套干净标准视频作为最终演示备份。"
+}

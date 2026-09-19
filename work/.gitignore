@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 密钥与设备信息（绝不入库，绝不贴给公共 AI）
+.env
+*.env
+.env.*
+secrets.json
+token.json
+
+# 模型权重（体积大，按需下载，不入库）
+*.pt
+*.pth
+*.onnx
+*.engine
+*.weights
+
+# 本地运行产物
+*.log
+*.jsonl
+logs/
+runs/
+outputs/
+
+# 原始拍摄素材（成品样例视频另放 data/demo/，按需入库）
+data/demo/raw/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

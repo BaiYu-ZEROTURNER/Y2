@@ -1,0 +1,63 @@
+# =============================================================================
+# eufy Guardian AI —— 风险 / 健康 规则表（契约文件，F0 冻结）
+#
+# 【谁能改】只有 B（张陈宇）能改本文件。A 只提交"实测数字 → 期望风险等级"的验收表。
+# 【为什么是 yaml】风险判断全部用可解释规则，现场调 Demo 只改这里，
+#                  不需要改 vision/ 或 core/ 的任何一行代码。
+# 【对应文档】《具体实施说明书》第九节 Risk Agent 规则表。
+# =============================================================================
+
+version: 2
+max_score: 100
+
+# -----------------------------------------------------------------------------
+# 风险等级区间（只有两个分界点，对应三段动作强度）
+#   score <  low            -> low     仅记录摘要，不打扰用户
+#   low  <= score < medium  -> medium  重点录像，保留事件上下文
+#   score >= medium         -> high    PTZ 跟踪 + 开灯 + 重点录像 + 高优通知
+# 注意：旧版曾有一个 high: 80 的配置，但 DecisionEngine 从未读取，已删除。
+# -----------------------------------------------------------------------------
+thresholds:
+  low: 30
+  medium: 60
+
+# 夜间判定（24h 制，跨午夜）：is_night = (hour >= night_start) or (hour < night_end)
+time:
+  night_start: 22
+  night_end: 6
+
+# -----------------------------------------------------------------------------
+# 行为判定参数（阈值，不含分数）
+# -----------------------------------------------------------------------------
+params:
+  stay_long_seconds: 30        # 停留超过 30s 触发第一档 long_stay
+  stay_very_long_seconds: 60   # 停留超过 60s 再叠加第二档 long_stay_extra（递进，不一次跳到高风险）
+  sensitive_roi_min: 1         # 进入门锁 ROI 达到 1 次即算"进入敏感区域"
+  repeat_approach_min: 2       # 靠近门锁次数达到 2 次触发 repeat_approach
+
+# -----------------------------------------------------------------------------
+# 风险权重：所有命中项相加后 clamp 到 0..max_score
+# 每一项都对应 risk_reasons 里的一个字符串，保证分数完全可解释、可现场追问
+# -----------------------------------------------------------------------------
+weights:
+  unknown_identity: 20    # 身份未知                          -> "unknown"
+  night: 15               # 夜间时段                          -> "night"
+  long_stay: 10           # 停留 > 30s                        -> "long_stay"
+  long_stay_extra: 10     # 停留 > 60s（第二档，递进）           -> "long_stay_extra"
+  sensitive_roi: 15       # 进过门锁 ROI                      -> "sensitive_roi"
+  repeat_approach: 15     # 反复靠近门锁                      -> "repeat_approach"
+  package_left: 10        # 门口有包裹但身份异常（疑似遗留/异常投递） -> "package_left"
+  known_member: -20       # 已知成员 / 家人（降权）              -> "known_member"
+  delivery_like: -20      # 快递送件类行为（降权）                -> "delivery"
+
+# -----------------------------------------------------------------------------
+# Health Agent 判定阈值（画面层：黑屏 / 遮挡 / 冻结）
+# -----------------------------------------------------------------------------
+health:
+  black_frame_mean: 12     # 平均亮度低于此值判定黑屏 -> black_screen
+  edge_low: 0.04           # 边缘密度低于此值判定遮挡 -> obstructed
+  freeze_diff: 2.0         # 帧间平均差低于此值判定冻结 -> frozen
+  occlusion_score: 40      # 遮挡时的 health_score
+  black_score: 10          # 黑屏时的 health_score
+  freeze_score: 30         # 冻结时的 health_score
+  alert_score: 50          # 低于此值 DecisionEngine 判为"安防覆盖下降"

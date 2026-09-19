@@ -1,0 +1,15 @@
+# eufy Guardian AI —— 运行依赖
+# 核心链路（vision 特征 / risk / health / decision / mock demo）仅需 PyYAML。
+# 真实摄像头推理与 Streamlit UI 为可选；按需安装下面注释掉的包。
+
+pyyaml>=6.0
+
+# 真实目标检测（YOLO / RT-DETR）
+# ultralytics>=8.0
+# opencv-python-headless>=4.8
+
+# 演示 UI
+# streamlit>=1.30
+
+# 测试
+pytest>=7.0
